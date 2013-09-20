@@ -29,8 +29,7 @@ describe 'python and its dependencies' do
     .each {|package|
 	      expect(chef_run).to install_package package  
       }
-   end
-
+   end 
    it 'installs virtual env' do
       expect(chef_run).to execute_command('pip install virtualenv')
     end
@@ -112,5 +111,33 @@ describe 'Install and restart nginx ' do
   it 'restarts the nginx service' do
     expect(chef_run).to restart_service "nginx"
   end
+end
+
+describe 'install uwsgi' do
+	
+	it 'install uwsgi package' do
+		expect(chef_run).to install_package 'uwsgi'
+	end
+
+	it 'installs uwsgi-plugin-python' do
+		expect(chef_run).to install_package 'uwsgi-plugin-python'
+	end
+	
+	it 'creates uwsgi mics.ini' do
+		expect(chef_run).to create_file '/etc/uwsgi/apps-enabled/mics.ini'
+		expect(chef_run).to create_file '/etc/uwsgi/apps-available/mics.ini'
+	end
+	
+	it 'deletes /var/www/sockets/' do
+			expect(chef_run).to execute_command('rm -rf /var/www/sockets')
+	end
+ 
+	it 're-creates /var/www/sockets/' do
+		expect(chef_run).to execute_command('mkdir /var/www/ && mkdir /var/www/sockets')
+	end	
+
+	it 'starts uwsgi' do
+		expect(chef_run).to start_service 'uwsgi'
+	end
 end
 end

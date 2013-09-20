@@ -6,15 +6,15 @@ describe 'mics::default' do
 describe 'Install git'do
 
     it 'installs git package' do
-	expect(chef_run).to install_package 'git'
+	      expect(chef_run).to install_package 'git'
     end
 end
 
 describe 'python and its dependencies' do
    
-  it 'executes apt-get update' do
-     expect(chef_run).to execute_command('sudo apt-get update')
-   end
+    it 'executes apt-get update' do
+        expect(chef_run).to execute_command('sudo apt-get update')
+    end
 
    it 'installs python dependencies' do
     ['build-essential',
@@ -26,7 +26,7 @@ describe 'python and its dependencies' do
     'libxml2-dev',
     'libxslt1-dev']
     .each {|package|
-	expect(chef_run).to install_package package  
+	      expect(chef_run).to install_package package  
       }
    end
 
@@ -55,4 +55,46 @@ describe 'Mics project configuration' do
       expect(chef_run).to execute_command(command).with(:cwd =>'/vagrant/mics/')
    end
 end
+
+describe "Install lib memcached" do
+	it "installs memcache dependencies" do
+		memcached_deps = ['libsasl2-dev','libsasl2-dev','libcloog-ppl0','libmemcached-dev']
+		memcached_deps.each{|dep|
+			expect(chef_run).to install_package dep
+		}
+	end
+end
+describe "Installs postgres" do
+
+  it "Updates the system" do
+    expect(chef_run).to execute_command("sudo apt-get update")
+  end
+
+  it "Installs postgresql" do
+    expect(chef_run).to install_package("postgresql")
+  end
+
+  it "loads the postgres ph_hba conf file" do
+    expect(chef_run).to create_file '/etc/postgresql/9.1/main/pg_hba.conf'
+    file = chef_run.template('/etc/postgresql/9.1/main/pg_hba.conf')
+    expect(file).to be_owned_by('postgres')
+  end
+  
+  it "loads the postgres ph_hba conf file" do
+    expect(chef_run).to create_file '/etc/postgresql/9.1/main/pg_hba.conf'
+    file = chef_run.template('/etc/postgresql/9.1/main/pg_hba.conf')
+    expect(file).to be_owned_by('postgres')
+  end
+  it "loads the postgres conf file" do
+    expect(chef_run).to create_file '/etc/postgresql/9.1/main/postgresql.conf'
+    file = chef_run.template('/etc/postgresql/9.1/main/postgresql.conf')
+    expect(file).to be_owned_by('postgres')
+  end
+
+  it "restarts the postgres service" do
+    expect(chef_run).to restart_service "postgresql"
+  end
+
+end
+
 end

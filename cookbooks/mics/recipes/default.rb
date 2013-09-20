@@ -44,6 +44,29 @@ git "/vagrant/mics/" do
   action :checkout
 end
 
+
+%w{libmemcached-dev  libsasl2-dev libcloog-ppl-dev libcloog-ppl0 }.each do |pkg|
+		package pkg
+end
+
+package 'postgresql' do
+  action :install
+end
+
+template "/etc/postgresql/9.1/main/pg_hba.conf" do
+  user "postgres"
+  source "pg_hba.conf.erb"
+end
+
+template "/etc/postgresql/9.1/main/postgresql.conf" do
+  user "postgres"
+  source "postgresql.conf.erb"
+end
+
+service "postgresql" do
+  action :restart
+end
+
 execute'activating virtual env and installing pip requirements' do
    cwd '/vagrant/mics/'
    command "bash -c 'source /home/vagrant/mics_env/bin/activate && pip install -r pip-requires.txt'"

@@ -11,5 +11,5 @@ platforms:
 
 suites:
 - name: default
-  run_list: [mics]
+  run_list: ["recipe[mics]"]
   attributes: {}

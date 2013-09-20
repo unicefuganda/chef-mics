@@ -67,6 +67,13 @@ service "postgresql" do
   action :restart
 end
 
+execute "Create empty database" do
+  command "createdb mics_test"
+  user "postgres"
+  not_if "psql --list | grep mics", :user => 'postgres'
+  action :run
+end
+
 execute'activating virtual env and installing pip requirements' do
    cwd '/vagrant/mics/'
    command "bash -c 'source /home/vagrant/mics_env/bin/activate && pip install -r pip-requires.txt'"
@@ -77,4 +84,20 @@ execute "syncdb and run migrations" do
     cwd '/vagrant/mics/'
     command "bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput && python manage.py migrate'"
     action :run
+end
+
+package 'nginx' do
+  action :install
+end
+
+template "/etc/nginx/nginx.conf" do
+  source "nginx.conf.erb"
+end
+
+template "/etc/nginx/conf.d/nginx.conf" do
+  source "custom_nginx.conf.erb"
+end
+
+service 'nginx' do
+  action :restart
 end

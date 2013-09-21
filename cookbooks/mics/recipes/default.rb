@@ -44,6 +44,11 @@ git "/vagrant/mics/" do
   action :checkout
 end
 
+execute 'copy localsettings.example' do
+	cwd '/vagrant/mics/mics'
+	command "cp localsettings.py.example localsettings.py"
+	action :run
+end
 
 %w{libmemcached-dev  libsasl2-dev libcloog-ppl-dev libcloog-ppl0 }.each do |pkg|
 		package pkg
@@ -82,7 +87,7 @@ end
 
 execute "syncdb and run migrations" do
     cwd '/vagrant/mics/'
-    command "bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput && python manage.py migrate'"
+    command "bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput --settings=mics.testsettings && python manage.py migrate --settings=mics.testsettings'"
     action :run
 end
 

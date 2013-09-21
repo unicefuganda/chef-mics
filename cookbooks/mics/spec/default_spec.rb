@@ -30,17 +30,18 @@ describe 'python and its dependencies' do
 	      expect(chef_run).to install_package package  
       }
    end 
+
    it 'installs virtual env' do
       expect(chef_run).to execute_command('pip install virtualenv')
-    end
- 
-    it 'creates the mics virtual env' do
+   end
+
+   it 'creates the mics virtual env' do
        expect(chef_run).to execute_command('virtualenv mics_env').with(:cwd =>'/home/vagrant')
    end
   
     it 'changes ownership of the virtual env' do
-      expect(chef_run).to execute_command('sudo chown vagrant:vagrant /home/vagrant/mics_env/ -R')
-   end
+        expect(chef_run).to execute_command('sudo chown vagrant:vagrant /home/vagrant/mics_env/ -R')
+    end
 
 end
  
@@ -50,7 +51,7 @@ describe 'Mics project configuration' do
    end
 
    it 'syncs the database and runs migrations and 'do
-	    command="bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput && python manage.py migrate'"
+	    command="bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput --settings=mics.testsettings && python manage.py migrate --settings=mics.testsettings'"
       expect(chef_run).to execute_command(command).with(:cwd =>'/vagrant/mics/')
    end
 end

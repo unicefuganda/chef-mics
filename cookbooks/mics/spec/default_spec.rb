@@ -51,8 +51,18 @@ describe 'Mics project configuration' do
    end
 
    it 'syncs the database and runs migrations and 'do
-	    command="bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput --settings=mics.testsettings && python manage.py migrate --settings=mics.testsettings'"
+	    command="bash -c 'source /home/vagrant/mics_env/bin/activate && python manage.py syncdb --noinput && python manage.py migrate'"
       expect(chef_run).to execute_command(command).with(:cwd =>'/vagrant/mics/')
+   end
+
+   it 'copies investigator configuration 'do
+	    command='cp investigator_configs.py.example investigator_configs.py'
+      expect(chef_run).to execute_command(command).with(:cwd =>'/vagrant/mics/survey/')
+   end
+
+   it 'copies localsettings.example to localsettings'do
+	    command='cp localsettings.py.example localsettings.py'
+      expect(chef_run).to execute_command(command).with(:cwd =>'/vagrant/mics/mics/')
    end
 end
 
@@ -92,10 +102,16 @@ describe "Installs postgres" do
     expect(chef_run).to restart_service "postgresql"
   end
 
-  it "creates mics_db" do
-    expect(chef_run).to execute_command("createdb mics_test").with(:user => 'postgres')
+  it "creates root user " do
+      expect(chef_run).to execute_command("createuser -U postgres -h localhost -s root")
   end
-  
+  it "creates-mics-user" do
+    expect(chef_run).to execute_command("createuser -U postgres -h localhost -sw mics")
+  end
+
+  it "creates mics_db" do
+    expect(chef_run).to execute_command("createdb -U mics -h localhost -O mics -E utf8 -T template0 mics")
+  end
 end
 
 describe 'Install and restart nginx ' do

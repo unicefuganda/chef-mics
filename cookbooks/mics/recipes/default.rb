@@ -45,8 +45,15 @@ git "/vagrant/mics/" do
 end
 
 execute 'copy localsettings.example' do
-	cwd '/vagrant/mics/mics'
+	cwd '/vagrant/mics/mics/'
 	command "cp localsettings.py.example localsettings.py"
+	action :run
+end
+
+
+execute 'copy investigator_configs.py.example' do
+	cwd '/vagrant/mics/survey/'
+	command "cp investigator_configs.py.example investigator_configs.py"
 	action :run
 end
 
@@ -72,11 +79,28 @@ service "postgresql" do
   action :restart
 end
 
-execute "Create empty database" do
-  command "createdb mics_test"
-  user "postgres"
-  not_if "psql --list | grep mics", :user => 'postgres'
-  action :run
+execute "create-root-user" do
+    code = <<-EOH
+    psql -h localhost -U postgres -c "select * from pg_user where usename='root'" | grep -c root
+    EOH
+    command "createuser -U postgres -h localhost -s root"
+    not_if code 
+end
+ 
+execute "create-database-user" do
+    code = <<-EOH
+    psql -h localhost -U postgres -c "select * from pg_user where usename='mics'" | grep -c mics
+    EOH
+    command "createuser -U postgres -h localhost -sw mics"
+    not_if code 
+end
+
+execute "create-database" do
+    exists = <<-EOH
+    psql -h localhost -U mics -c "select * from pg_user where usename='mics'" | grep -c mics
+    EOH
+    command "createdb -U mics -h localhost -O mics -E utf8 -T template0 mics"
+    not_if exists
 end
 
 execute'activating virtual env and installing pip requirements' do
@@ -87,7 +111,7 @@ end
 
 execute "syncdb and run migrations" do
     cwd '/vagrant/mics/'
-    command "bash -c 'source /vagrant/mics_env/bin/activate && python manage.py syncdb --noinput --settings=mics.testsettings && python manage.py migrate --settings=mics.testsettings'"
+    command "bash -c 'source /home/vagrant/mics_env/bin/activate && python manage.py syncdb --noinput && python manage.py migrate'"
     action :run
 end
 

@@ -153,7 +153,7 @@ execute 'Delete /var/www/sockets' do
 end
 
 execute 'create /var/www/sockets' do
-	command 'mkdir /var/www/ && mkdir /var/www/sockets'
+	command 'mkdir -p /var/www/ && mkdir -p /var/www/sockets'
 	action :run
 end
 

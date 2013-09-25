@@ -150,7 +150,7 @@ describe 'install uwsgi' do
 	end
  
 	it 're-creates /var/www/sockets/' do
-		expect(chef_run).to execute_command('mkdir /var/www/ && mkdir /var/www/sockets')
+		expect(chef_run).to execute_command('mkdir -p /var/www/ && mkdir -p /var/www/sockets')
 	end	
 
 	it 'starts uwsgi' do
